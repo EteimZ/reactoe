@@ -1,0 +1,30 @@
+.status {
+    text-align: center;
+    font-size: 25px;
+    font-weight: bold;
+}
+
+.container{
+    display: grid;
+    grid-template-columns: auto auto auto;
+    width: 306px;
+    grid-column-gap: 10px;
+    grid-row-gap: 10px;
+    margin: 50px auto;
+  }
+
+  .square {
+    background-color: rgba(0, 175, 0, 0.8);
+    border: 1px solid rgba(0, 0, 0, 0.8);
+    width: 100px;
+    height: 100px;
+    font-size: 60px;
+    text-align: center;
+    line-height: 100px;
+  }
+
+  .square:hover {
+    opacity: 0.6;
+    cursor: pointer;
+
+  }
