@@ -1,23 +1,57 @@
 import { useState } from "react";
-import Square from "./components/Square";
+import Board from "./components/Board";
 import { calculateWinner } from "./utils";
 import "./App.css";
 
-function Board() {
-  const [squares, setSquares] = useState(Array(9).fill(null));
+//                    Todo
+//########################################################
+// Remove move buttons and replace it with an undo button.
+// Notify players when there's a draw.
+// Higlight winning squares
+// Add CSS styling
+//########################################################
+
+function Game() {
+  const [history, setHistory] = useState([{ squares : Array(9).fill(null) }]);
+  const [stepNumber, setStepNumber] = useState(0);
   const [xIsNext, setXIsNext] = useState(true);
 
-  function handleOnclick(i) {
-    const squaresClone = squares.slice();
-    if (calculateWinner(squaresClone) || squares[i]) {
+  function handleOnClick(i) {
+
+    const historyVal = history.slice(0, stepNumber + 1);
+    const current = historyVal[historyVal.length - 1];
+    const squares = current.squares.slice();
+
+    if (calculateWinner(squares) || squares[i]) {
       return;
     }
-    squaresClone[i] = xIsNext ? "X" : "O";
-    setSquares(squaresClone);
+    squares[i] = xIsNext ? "X" : "O";
+    setHistory(historyVal.concat([{ squares: squares}]));
+    setStepNumber(historyVal.length);
     setXIsNext(!xIsNext);
   }
 
-  const winner = calculateWinner(squares);
+  function jumpTo(step) {
+    setStepNumber(step);
+    setXIsNext( (step % 2) == 0 );
+  }
+
+  
+  const current = history[stepNumber];
+  const winner = calculateWinner(current.squares);
+
+  const moves = history.map((_, move) =>{
+    const desc = move ? "Go to move #" + move : 'Reset';
+
+    return (
+      <li key={move}>
+        <button onClick={() => { jumpTo(move)}}>
+          {desc}
+        </button>
+        </li>
+    );
+  });
+
   let status;
   if (winner) {
     status = "Winner: " + winner;
@@ -25,22 +59,18 @@ function Board() {
     status = "Next player: " + (xIsNext ? "X" : "O");
   }
 
-  const Squares = [...Array(9).keys()].map((i) => (
-    <Square
-      value={squares[i]}
-      key={i.toString()}
-      onClick={() => {
-        handleOnclick(i);
-      }}
-    ></Square>
-  ));
-
   return (
-    <div>
-      <div className="status"> {status} </div>
-      <div className="container">{Squares}</div>
+    <div className="game">
+      <div className="game-board">
+        <Board squares={current.squares}
+        onClick={(i) => handleOnClick(i)}/>
+      </div>
+      <div className="game-info">
+        <div>{status}</div>
+        <ol>{moves}</ol>
+      </div>
     </div>
   );
 }
 
-export default Board;
+export default Game;
