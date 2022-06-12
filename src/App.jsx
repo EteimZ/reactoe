@@ -3,21 +3,13 @@ import Board from "./components/Board";
 import { calculateWinner } from "./utils";
 import "./App.css";
 
-//                    Todo
-//########################################################
-// Remove move buttons and replace it with an undo button.
-// Notify players when there's a draw.
-// Higlight winning squares
-// Add CSS styling
-//########################################################
 
 function Game() {
-  const [history, setHistory] = useState([{ squares : Array(9).fill(null) }]);
+  const [history, setHistory] = useState([{ squares: Array(9).fill(null) }]);
   const [stepNumber, setStepNumber] = useState(0);
   const [xIsNext, setXIsNext] = useState(true);
 
   function handleOnClick(i) {
-
     const historyVal = history.slice(0, stepNumber + 1);
     const current = historyVal[historyVal.length - 1];
     const squares = current.squares.slice();
@@ -26,48 +18,49 @@ function Game() {
       return;
     }
     squares[i] = xIsNext ? "X" : "O";
-    setHistory(historyVal.concat([{ squares: squares}]));
+    setHistory(historyVal.concat([{ squares: squares }]));
     setStepNumber(historyVal.length);
     setXIsNext(!xIsNext);
   }
 
-  function jumpTo(step) {
-    setStepNumber(step);
-    setXIsNext( (step % 2) == 0 );
+  function redo(step) {
+    let val = step == -1 ? 0 : step;
+    setStepNumber(val);
+    setXIsNext(val % 2 == 0);
   }
 
-  
+  function reset() {
+    setStepNumber(0);
+    setXIsNext(true);
+  }
+
   const current = history[stepNumber];
   const winner = calculateWinner(current.squares);
 
-  const moves = history.map((_, move) =>{
-    const desc = move ? "Go to move #" + move : 'Reset';
-
-    return (
-      <li key={move}>
-        <button onClick={() => { jumpTo(move)}}>
-          {desc}
-        </button>
-        </li>
-    );
-  });
-
   let status;
   if (winner) {
-    status = "Winner: " + winner;
+    status = "Winner: " + winner[0];
+  } else if (stepNumber == 9) {
+    status = "Game draw";
   } else {
     status = "Next player: " + (xIsNext ? "X" : "O");
   }
 
   return (
-    <div className="game">
-      <div className="game-board">
-        <Board squares={current.squares}
-        onClick={(i) => handleOnClick(i)}/>
-      </div>
+    <div>
+      <div className="status">{status}</div>
+      <Board
+        squares={current.squares}
+        onClick={(i) => handleOnClick(i)}
+        win={winner ? winner.slice(1) : null}
+      />
       <div className="game-info">
-        <div>{status}</div>
-        <ol>{moves}</ol>
+        <button className="btn" onClick={() => redo(stepNumber - 1)}>
+          Redo
+        </button>
+        <button className="btn" onClick={() => reset()}>
+          Reset
+        </button>
       </div>
     </div>
   );
